@@ -1,36 +1,37 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { PureComponent } from 'react';
 import { CodeEmitter, codeConnect } from './CodeEmitter';
 
-const Label = (props) => (
-  <h2>Subscribers: {props.subscribers}, Counter: {props.counter}</h2>
-);
+function* range (...params) {
+  const [to, from = 0] = params.reverse();
 
-const ConnectedLabel = codeConnect(Label);
+  for(let i = from; i < to; i++)
+    yield i;
+}
 
-class App extends Component {
+const ConnectedLabel = codeConnect(({subscribers, counter}) => (
+  <h2>Subscribers: {subscribers}, Counter: {counter}</h2>
+));
+
+class App extends PureComponent {
   state = {
-    labels: 0
+    labelCount: 0
   };
 
-  renderLabels = () => {
-    const labels = [];
-
-    for(let i = 0; i < this.state.labels; i++)
-      labels.push(<ConnectedLabel key={i}/>);
-
-    return labels;
-  }
-
   render() {
+    const {
+      labelCount
+    } = this.state;
+
+    const array = [...range(labelCount)];
 
     return (
       <CodeEmitter>
         <div>
-          {this.renderLabels()}
-          <button onClick={() => this.setState((state) => ({...state, labels: state.labels + 1}))}>Add</button>
-          <button onClick={() => this.setState((state) => ({...state, labels: state.labels - 1}))}>Remove</button>
+          {array.map((i) => (
+            <ConnectedLabel key={i} />
+          ))}
+          <button onClick={() => this.setState((state) => ({...state, labelCount: state.labelCount + 1}))}>Add</button>
+          <button onClick={() => this.setState((state) => ({...state, labelCount: state.labelCount - 1}))}>Remove</button>
         </div>
       </CodeEmitter>
     );
